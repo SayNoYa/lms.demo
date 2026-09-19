@@ -1,0 +1,847 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Демо — обучение сотрудников</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23234e52'/%3E%3Cpath d='M8 22h5v-5h5v-5h6' stroke='%23f2b35b' stroke-width='3' fill='none' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#f4f5f2;--surface:#fff;--ink:#1d2527;--muted:#66717a;--line:#e1e4de;
+  --brand:#234e52;--brand-2:#2f6b70;--brand-soft:#e3eeec;--accent:#f2b35b;
+  --ok:#2f7d4f;--ok-soft:#e2f2e7;--warn:#a86412;--warn-soft:#fbefdc;--bad:#b23a3a;--bad-soft:#f9e3e1;
+  --r:12px;
+}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+h1,h2,h3{line-height:1.25;margin:0}
+h1{font-size:24px}h2{font-size:18px}h3{font-size:15px}
+.muted{color:var(--muted)}.small{font-size:13px}
+/* header */
+.top{background:var(--brand);color:#fff;position:sticky;top:0;z-index:5}
+.top-in{max-width:1120px;margin:0 auto;padding:10px 16px;display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:17px;letter-spacing:.2px}
+.tabs{display:flex;gap:4px;flex:1}
+.tab{background:none;border:0;color:#cfe0de;padding:8px 12px;border-radius:8px;font-weight:600;font-size:14px}
+.tab:hover{background:rgba(255,255,255,.08);color:#fff}
+.tab.on{background:rgba(255,255,255,.14);color:#fff;box-shadow:inset 0 -2px 0 var(--accent)}
+.as{display:flex;align-items:center;gap:8px;font-size:13px;color:#cfe0de}
+.as select{background:#1a3d40;border:1px solid #3f7075;color:#fff;border-radius:8px;padding:6px 8px;max-width:200px}
+main{max-width:1120px;margin:0 auto;padding:24px 16px 64px}
+/* common */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);padding:18px}
+.row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.between{justify-content:space-between}
+.grid{display:grid;gap:14px}
+.g2{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.g4{grid-template-columns:repeat(4,1fr)}
+.stack>*+*{margin-top:14px}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 14px;font-weight:600;font-size:14px}
+.btn:hover{border-color:#c5cbc2}
+.btn.pri{background:var(--brand);border-color:var(--brand);color:#fff}
+.btn.pri:hover{background:var(--brand-2)}
+.btn.sm{padding:5px 10px;font-size:13px}
+.btn.link{border:0;background:none;padding:4px 0;color:var(--brand-2)}
+.chip{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--muted)}
+.chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.chip b{font-weight:700;margin-left:4px;opacity:.75}
+.inp{border:1px solid var(--line);background:var(--surface);border-radius:9px;padding:8px 12px;min-width:0}
+.inp:focus,.btn:focus-visible,.chip:focus-visible{outline:2px solid var(--brand-2);outline-offset:1px}
+.badge{display:inline-block;border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;white-space:nowrap}
+.b-ok{background:var(--ok-soft);color:var(--ok)}.b-warn{background:var(--warn-soft);color:var(--warn)}
+.b-bad{background:var(--bad-soft);color:var(--bad)}.b-info{background:var(--brand-soft);color:var(--brand)}
+.b-gray{background:#eceeea;color:var(--muted)}
+.bar{height:8px;background:#e9ece6;border-radius:99px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--brand-2);border-radius:99px}
+.bar.done i{background:var(--ok)}
+.kpi .v{font-size:26px;font-weight:700;margin-top:2px}
+.kpi .l{font-size:13px;color:var(--muted)}
+.empty{text-align:center;padding:40px 16px;color:var(--muted)}
+.scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+table{border-collapse:collapse;width:100%;font-size:14px}
+th{text-align:left;font-size:12px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px;border-bottom:1px solid var(--line);vertical-align:middle}
+tr.click{cursor:pointer}tr.click:hover td{background:#fafbf8}
+tr.open td{background:#f6f8f4}
+.sub td{background:#fbfcfa;padding:14px}
+.toast{position:fixed;left:50%;bottom:20px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;z-index:20;max-width:calc(100% - 32px);box-shadow:0 6px 20px rgba(0,0,0,.2)}
+/* catalog */
+.ccard{display:flex;flex-direction:column;gap:10px;text-align:left;cursor:pointer}
+.ccard:hover{border-color:#bfc7bd}
+.ctag{font-size:12px;font-weight:700;color:var(--brand-2);text-transform:uppercase;letter-spacing:.5px}
+.day{border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.day-h{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;background:#fafbf8;flex-wrap:wrap}
+.day.lock .day-h{background:#f3f4f1}
+.les{display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid var(--line);width:100%;background:none;border-left:0;border-right:0;border-bottom:0;text-align:left}
+button.les:hover{background:#f7f9f5}
+.dot{width:22px;height:22px;border-radius:50%;border:2px solid #c9cfc6;flex:none;display:grid;place-items:center;font-size:12px;color:#fff}
+.dot.ok{background:var(--ok);border-color:var(--ok)}
+.day.lock .les{color:var(--muted)}
+/* lesson */
+.lesson-grid{display:grid;grid-template-columns:260px 1fr;gap:18px;align-items:start}
+.side .les{border-radius:8px;border:0;padding:8px 10px}
+.side .les.cur{background:var(--brand-soft);font-weight:600}
+.steps{display:flex;gap:6px;flex-wrap:wrap;margin:14px 0 18px}
+.content p{margin:0 0 12px}
+.content ul{margin:0 0 12px;padding-left:20px}
+.content li{margin:4px 0}
+.note{background:var(--warn-soft);border-left:3px solid var(--accent);padding:10px 14px;border-radius:8px;margin:0 0 12px}
+.q{border:1px solid var(--line);border-radius:10px;padding:14px;margin-bottom:12px}
+.q.ok{border-color:#a9d3b6;background:#f4faf6}.q.bad{border-color:#e6b7b3;background:#fdf6f5}.q.rev{border-color:#ecd2a6;background:#fffaf1}
+.opt{display:flex;gap:10px;align-items:flex-start;padding:6px 0;cursor:pointer}
+.opt input{margin-top:4px;accent-color:var(--brand)}
+textarea.inp{width:100%;min-height:80px;resize:vertical}
+.result{border-radius:10px;padding:14px 16px;margin:12px 0}
+.result.ok{background:var(--ok-soft)}.result.bad{background:var(--bad-soft)}
+.foot{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}
+.ans{font-size:14px;padding:8px 0;border-top:1px dashed var(--line)}
+@media (max-width:820px){
+  .g4{grid-template-columns:repeat(2,1fr)}
+  .lesson-grid{grid-template-columns:1fr}
+  .side{order:2}
+}
+@media (max-width:640px){
+  .top-in{gap:8px;padding:8px 16px}
+  .tabs{order:3;flex-basis:100%;display:grid;grid-template-columns:repeat(4,1fr)}
+  .tab{padding:8px 2px;font-size:13px;text-align:center}
+  .as{margin-left:auto}
+  .as span{display:none}
+  .as select{max-width:170px}
+  main{padding-top:16px}
+  h1{font-size:21px}
+  .g2{grid-template-columns:1fr}
+  .card{padding:14px}
+  .kpi .v{font-size:22px}
+  .hide-m{display:none}
+}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<script>
+/* =====================================================================
+   ДАННЫЕ. Один объект — можно заменить целиком.
+   Даты заданы в днях относительно текущего дня (-10 = 10 дней назад),
+   чтобы стенд не «старел».
+   assignments.done — сколько первых уроков курса уже пройдено.
+   ===================================================================== */
+const DATA = {
+  company: 'Демо',
+  maxAttempts: 10,
+  employees: [
+    { id: 'e1', name: 'Анна Смирнова', position: 'Продавец-консультант' },
+    { id: 'e2', name: 'Дмитрий Орлов', position: 'Кладовщик' },
+    { id: 'e3', name: 'Мария Ковалёва', position: 'Старший кассир' },
+    { id: 'e4', name: 'Игорь Лебедев', position: 'Продавец-консультант' },
+    { id: 'e5', name: 'Елена Павлова', position: 'Администратор зала' },
+    { id: 'e6', name: 'Сергей Никитин', position: 'Кладовщик' },
+    { id: 'e7', name: 'Ольга Фёдорова', position: 'Кассир' },
+    { id: 'e8', name: 'Павел Морозов', position: 'Продавец-консультант' },
+    { id: 'e9', name: 'Татьяна Волкова', position: 'Товаровед' },
+    { id: 'e10', name: 'Алексей Григорьев', position: 'Стажёр' }
+  ],
+  courses: [
+    {
+      id: 'c1', tag: 'Безопасность', title: 'Охрана труда',
+      description: 'Базовые правила безопасной работы в торговом зале и на складе.',
+      days: [
+        { id: 'c1d1', title: 'День 1. Основы', lessons: [
+          { id: 'c1l1', title: 'Общие требования безопасности', steps: [
+            ['Зачем это нужно', 'Большинство производственных травм в торговле случаются из-за спешки и нарушения простых правил.\nЦель курса — чтобы каждый сотрудник знал эти правила и понимал, почему они существуют.'],
+            ['Рабочее место', '- Проходы и эвакуационные выходы всегда свободны.\n- Коробки не ставятся выше плеч.\n- Разлитую жидкость убирают сразу и ставят предупреждающую табличку.\n! Если опасность нельзя устранить самому — сообщите руководителю смены.']
+          ], quiz: { pass: 80, questions: [
+            { type: 'radio', text: 'Что нужно сделать, если на полу разлита жидкость?', options: ['Обойти и продолжить работу', '*Убрать и поставить предупреждающую табличку', 'Дождаться уборщика'] },
+            { type: 'checkbox', text: 'Что должно быть всегда свободно?', options: ['*Проходы', '*Эвакуационные выходы', 'Верхние полки стеллажей'] }
+          ] } },
+          { id: 'c1l2', title: 'Средства индивидуальной защиты', steps: [
+            ['Какие СИЗ используются', '- Перчатки — при работе с тарой и режущим инструментом.\n- Защитная обувь — на складе.\n- Сигнальный жилет — в зоне погрузки.'],
+            ['Уход и замена', 'СИЗ проверяют перед каждой сменой. Повреждённые средства не используют, а сдают на замену через руководителя.']
+          ] }
+        ] },
+        { id: 'c1d2', title: 'День 2. Чрезвычайные ситуации', lessons: [
+          { id: 'c1l3', title: 'Пожарная безопасность', steps: [
+            ['Порядок действий', '- Сообщить о возгорании по номеру 101 или 112.\n- Оповестить коллег и покупателей.\n- Начать эвакуацию по плану.\n- Использовать огнетушитель только если это безопасно.'],
+            ['Огнетушитель', 'Порошковый огнетушитель подходит для большинства возгораний в магазине. Струю направляют на основание пламени, а не на дым.\n! Электрооборудование под напряжением нельзя тушить водой.']
+          ], quiz: { pass: 80, questions: [
+            { type: 'radio', text: 'Куда направлять струю огнетушителя?', options: ['На дым', '*На основание пламени', 'Вверх над огнём'] },
+            { type: 'radio', text: 'Можно ли тушить водой оборудование под напряжением?', options: ['Да, если быстро', '*Нет'] },
+            { type: 'checkbox', text: 'Выберите первые действия при возгорании', options: ['*Сообщить в экстренную службу', '*Оповестить людей', 'Собрать личные вещи'] }
+          ] } },
+          { id: 'c1l4', title: 'Первая помощь', steps: [
+            ['Общий алгоритм', '- Убедиться, что нет опасности для себя.\n- Вызвать скорую помощь.\n- Оказать помощь в пределах своих навыков.'],
+            ['Аптечка', 'Аптечка находится в комнате персонала. Руководитель смены раз в месяц проверяет её комплектность и сроки годности.']
+          ] }
+        ] },
+        { id: 'c1d3', title: 'День 3. Итог', lessons: [
+          { id: 'c1l5', title: 'Итоговая проверка', steps: [
+            ['Повторение', 'Перед итоговым тестом вспомните основные правила: свободные проходы, исправные СИЗ, порядок действий при пожаре и травме.']
+          ], quiz: { pass: 80, questions: [
+            { type: 'radio', text: 'Кому сообщить об опасности, которую нельзя устранить самому?', options: ['Покупателю', '*Руководителю смены', 'Никому'] },
+            { type: 'checkbox', text: 'Когда нужны перчатки?', options: ['*При работе с тарой', '*При работе с режущим инструментом', 'При работе на кассе'] },
+            { type: 'text', text: 'Опишите, что вы сделаете, если увидите загромождённый эвакуационный выход.' }
+          ] } }
+        ] }
+      ]
+    },
+    {
+      id: 'c2', tag: 'Сервис', title: 'Работа с клиентами',
+      description: 'Стандарты обслуживания, выявление потребностей и работа с возражениями.',
+      days: [
+        { id: 'c2d1', title: 'День 1. Стандарты', lessons: [
+          { id: 'c2l1', title: 'Стандарты обслуживания', steps: [
+            ['Контакт', 'Покупателя приветствуют в течение 10 секунд после того, как он оказался рядом. Приветствие короткое и без навязчивости.'],
+            ['Внешний вид и речь', '- Бейдж на видном месте.\n- Без жаргона и профессионального сленга.\n- Не обсуждаем с коллегами личные темы при покупателях.']
+          ] },
+          { id: 'c2l2', title: 'Выявление потребностей', steps: [
+            ['Открытые вопросы', 'Открытые вопросы начинаются с «что», «как», «для чего». Они помогают понять задачу покупателя, а не только название товара.'],
+            ['Пример', '«Для чего вам нужен ноутбук?» лучше, чем «Вам ноутбук?»: ответ сразу сужает выбор.']
+          ], quiz: { pass: 80, questions: [
+            { type: 'radio', text: 'Какой вопрос открытый?', options: ['Вам нужна помощь?', '*Для чего вы выбираете товар?', 'Вы уже решили?'] },
+            { type: 'radio', text: 'За сколько секунд нужно поприветствовать покупателя?', options: ['*10', '60', 'Когда он сам обратится'] }
+          ] } }
+        ] },
+        { id: 'c2d2', title: 'День 2. Сложные случаи', lessons: [
+          { id: 'c2l3', title: 'Работа с возражениями', steps: [
+            ['Схема', '- Выслушать до конца.\n- Согласиться с чувством, а не с утверждением.\n- Уточнить причину.\n- Предложить решение.'],
+            ['Частое возражение', '«Дорого» чаще всего означает «не понимаю, за что платить». Расскажите, какую задачу решает товар.']
+          ], quiz: { pass: 80, questions: [
+            { type: 'checkbox', text: 'Выберите шаги работы с возражением', options: ['*Выслушать', '*Уточнить причину', 'Сразу предложить скидку', '*Предложить решение'] },
+            { type: 'text', text: 'Как вы ответите покупателю, который говорит «у конкурентов дешевле»?' }
+          ] } },
+          { id: 'c2l4', title: 'Конфликтные ситуации', steps: [
+            ['Сохраняем спокойствие', 'Говорите ровно и не переходите на личности. Если ситуация выходит из-под контроля, пригласите руководителя смены.']
+          ] }
+        ] }
+      ]
+    },
+    {
+      id: 'c3', tag: 'Склад', title: 'Товароведение',
+      description: 'Приёмка, хранение, маркировка и инвентаризация товара.',
+      days: [
+        { id: 'c3d1', title: 'День 1. Приёмка и хранение', lessons: [
+          { id: 'c3l1', title: 'Приёмка товара', steps: [
+            ['Сверка', 'Товар принимают по сопроводительным документам: количество мест, целостность упаковки, соответствие артикулов.'],
+            ['Расхождения', '! Расхождения фиксируют в акте до подписания документов, а не после.']
+          ], quiz: { pass: 80, questions: [
+            { type: 'radio', text: 'Когда фиксируются расхождения при приёмке?', options: ['*До подписания документов', 'После подписания', 'На следующий день'] },
+            { type: 'checkbox', text: 'Что проверяют при приёмке?', options: ['*Количество мест', '*Целостность упаковки', 'Цвет накладной'] }
+          ] } },
+          { id: 'c3l2', title: 'Хранение и маркировка', steps: [
+            ['Правила хранения', '- Тяжёлое — внизу, лёгкое — наверху.\n- Первым уходит товар, пришедший раньше.\n- Каждое место хранения подписано.']
+          ] }
+        ] },
+        { id: 'c3d2', title: 'День 2. Учёт', lessons: [
+          { id: 'c3l3', title: 'Инвентаризация', steps: [
+            ['Подготовка', 'До начала инвентаризации закрывают все документы по движению товара и не проводят отгрузки.'],
+            ['Пересчёт', 'Считают двое: один считает, второй записывает. Затем меняются на выборочной проверке.']
+          ], quiz: { pass: 80, questions: [
+            { type: 'radio', text: 'Сколько человек участвует в пересчёте?', options: ['Один', '*Двое', 'Весь склад'] },
+            { type: 'radio', text: 'Что делают до начала инвентаризации?', options: ['*Закрывают документы по движению товара', 'Принимают новую поставку'] }
+          ] } }
+        ] }
+      ]
+    },
+    {
+      id: 'c4', tag: 'Регламенты', title: 'Внутренние регламенты',
+      description: 'График работы, смены, документооборот и порядок обращений.',
+      days: [
+        { id: 'c4d1', title: 'День 1', lessons: [
+          { id: 'c4l1', title: 'Рабочий график и смены', steps: [
+            ['График', 'График на месяц публикуется до 25-го числа предыдущего месяца. Обмен сменами согласуется с руководителем заранее.']
+          ] },
+          { id: 'c4l2', title: 'Документооборот', steps: [
+            ['Заявления', 'Заявления на отпуск подаются не позднее чем за две недели. Заявление подаётся через руководителя подразделения.']
+          ], quiz: { pass: 100, questions: [
+            { type: 'radio', text: 'За сколько подаётся заявление на отпуск?', options: ['За три дня', '*За две недели', 'В день отпуска'] }
+          ] } }
+        ] }
+      ]
+    },
+    {
+      id: 'c5', tag: 'Касса', title: 'Кассовая дисциплина',
+      description: 'Открытие и закрытие смены, возвраты и работа с наличными.',
+      days: [
+        { id: 'c5d1', title: 'День 1', lessons: [
+          { id: 'c5l1', title: 'Открытие и закрытие смены', steps: [
+            ['Порядок', '- Проверить размен.\n- Открыть смену в кассовой программе.\n- В конце дня снять отчёт и сверить наличные.']
+          ] },
+          { id: 'c5l2', title: 'Возвраты', steps: [
+            ['Оформление', 'Возврат оформляется только по чеку или выписке и с разрешения старшего кассира.']
+          ], quiz: { pass: 80, questions: [
+            { type: 'radio', text: 'Кто разрешает возврат?', options: ['Сам кассир', '*Старший кассир', 'Покупатель'] },
+            { type: 'checkbox', text: 'Что делают в конце смены?', options: ['*Снимают отчёт', '*Сверяют наличные', 'Меняют пароль'] }
+          ] } }
+        ] }
+      ]
+    }
+  ],
+  // assigned / due — дни относительно сегодня; active:false — назначение отозвано
+  assignments: [
+    { employee: 'e1', course: 'c1', assigned: -25, due: 12, done: 2 },
+    { employee: 'e1', course: 'c2', assigned: -6, due: 20, done: 0 },
+    { employee: 'e1', course: 'c4', assigned: -80, due: -60, done: 2 },
+    { employee: 'e2', course: 'c1', assigned: -150, due: -120, done: 5 },
+    { employee: 'e2', course: 'c3', assigned: -100, due: -70, done: 3 },
+    { employee: 'e2', course: 'c4', assigned: -100, due: -80, done: 2 },
+    { employee: 'e3', course: 'c1', assigned: -170, due: -140, done: 5 },
+    { employee: 'e3', course: 'c2', assigned: -120, due: -90, done: 4 },
+    { employee: 'e3', course: 'c4', assigned: -170, due: -150, done: 2 },
+    { employee: 'e3', course: 'c5', assigned: -60, due: -40, done: 2 },
+    { employee: 'e4', course: 'c1', assigned: -45, due: -5, done: 1 },
+    { employee: 'e4', course: 'c2', assigned: -45, due: -5, done: 0 },
+    { employee: 'e5', course: 'c2', assigned: -30, due: 5, done: 3 },
+    { employee: 'e5', course: 'c4', assigned: -30, due: -10, done: 2 },
+    { employee: 'e6', course: 'c3', assigned: -20, due: 2, done: 1 },
+    { employee: 'e6', course: 'c1', assigned: -3, due: 25, done: 0 },
+    { employee: 'e6', course: 'c4', assigned: -40, due: -20, done: 1, active: false },
+    { employee: 'e7', course: 'c5', assigned: -15, due: 7, done: 1 },
+    { employee: 'e7', course: 'c4', assigned: -15, due: -1, done: 0 },
+    { employee: 'e8', course: 'c1', assigned: -35, due: 4, done: 3 },
+    { employee: 'e8', course: 'c2', assigned: -35, due: 10, done: 2 },
+    { employee: 'e9', course: 'c3', assigned: -60, due: -30, done: 3 },
+    { employee: 'e9', course: 'c1', assigned: -60, due: 3, done: 4 },
+    { employee: 'e10', course: 'c4', assigned: -2, due: 12, done: 0 },
+    { employee: 'e10', course: 'c1', assigned: -2, due: 30, done: 0 }
+  ],
+  // Неудачные попытки тестов (до успешной, если урок пройден)
+  failedAttempts: [
+    { employee: 'e4', lesson: 'c1l3', daysAgo: 9 }, { employee: 'e4', lesson: 'c1l3', daysAgo: 8 },
+    { employee: 'e8', lesson: 'c2l3', daysAgo: 3 }, { employee: 'e9', lesson: 'c1l5', daysAgo: 2 },
+    { employee: 'e7', lesson: 'c5l2', daysAgo: 1 }, { employee: 'e1', lesson: 'c1l1', daysAgo: 14 }
+  ],
+  // Примеры письменных ответов для сгенерированных попыток
+  sampleTextAnswers: [
+    'Освобожу проход, если могу сделать это сам, и сразу сообщу руководителю смены.',
+    'Уточню, какой товар и условия у конкурента, и расскажу про гарантию и сервис у нас.',
+    'Сообщу руководителю, поставлю табличку и не буду оставлять выход заставленным.'
+  ]
+};
+
+/* =====================================================================
+   МОДЕЛЬ И ЛОГИКА
+   ===================================================================== */
+const DAY = 864e5;
+const today0 = () => { const d = new Date(); d.setHours(0, 0, 0, 0); return d; };
+const rel = n => new Date(today0().getTime() + n * DAY + 12 * 36e5);
+const nextMidnight = d => { const m = new Date(d); m.setHours(24, 0, 0, 0); return m; };
+const fmtD = d => d ? d.toLocaleDateString('ru-RU', { day: '2-digit', month: '2-digit', year: 'numeric' }) : '—';
+const fmtDT = d => d.toLocaleString('ru-RU', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const key = (e, l) => e + '|' + l;
+const isCorrectOpt = o => o.startsWith('*');
+const optText = o => o.replace(/^\*/, '');
+
+const COURSES = {}, LESSONS = {}, EMP = {};
+DATA.employees.forEach(e => EMP[e.id] = e);
+DATA.courses.forEach(c => {
+  COURSES[c.id] = c;
+  c.flat = [];
+  c.days.forEach((d, di) => d.lessons.forEach(l => { LESSONS[l.id] = { lesson: l, course: c, day: d, dayIdx: di, idx: c.flat.length }; c.flat.push(l); }));
+});
+
+let DB, S, uid = 0;
+
+function seed() {
+  DB = { assign: [], done: new Map(), attempts: [] };
+  DATA.assignments.forEach(a => {
+    DB.assign.push({ id: 'a' + (++uid), emp: a.employee, course: a.course, assigned: rel(a.assigned), due: rel(a.due), active: a.active !== false });
+    const lessons = COURSES[a.course].flat;
+    const step = Math.max(1, Math.floor((-a.assigned - 1) / Math.max(a.done, 1)));
+    for (let i = 0; i < a.done; i++) {
+      const at = rel(-Math.max(1, -a.assigned - (i + 1) * step) - .1);
+      DB.done.set(key(a.employee, lessons[i].id), at);
+      const quiz = lessons[i].quiz;
+      if (quiz) {
+        DATA.failedAttempts.filter(f => f.employee === a.employee && f.lesson === lessons[i].id)
+          .forEach(f => addAttempt(a.employee, lessons[i].id, autoAnswers(quiz, false, uid), rel(-f.daysAgo), true));
+        addAttempt(a.employee, lessons[i].id, autoAnswers(quiz, true, uid), at, !(quiz.questions.some(q => q.type === 'text') && (Date.now() - at) / DAY < 30));
+      }
+    }
+  });
+  DATA.failedAttempts.forEach(f => {
+    if (!DB.done.has(key(f.employee, f.lesson))) addAttempt(f.employee, f.lesson, autoAnswers(LESSONS[f.lesson].lesson.quiz, false, uid), rel(-f.daysAgo), false);
+  });
+}
+
+// ответы для сгенерированных попыток: все верные или с ошибками в первых вопросах
+function autoAnswers(quiz, correct, n) {
+  return quiz.questions.map((q, i) => {
+    if (q.type === 'text') return DATA.sampleTextAnswers[n % DATA.sampleTextAnswers.length];
+    const right = q.options.filter(isCorrectOpt).map(optText);
+    if (correct || i > 0) return right;
+    return [q.options.map(optText).find(o => !right.includes(o))];
+  });
+}
+
+// Проверка теста: правильные ответы берутся из урока, а не из клиента
+function grade(quiz, answers) {
+  let auto = 0, ok = 0;
+  const items = quiz.questions.map((q, i) => {
+    const a = answers[i];
+    if (q.type === 'text') return { q: q.text, type: q.type, text: a, ok: null };
+    auto++;
+    const right = q.options.filter(isCorrectOpt).map(optText).sort();
+    const sel = [...a].sort();
+    const hit = sel.length === right.length && sel.every((v, k) => v === right[k]); // для checkbox — точное совпадение множества
+    if (hit) ok++;
+    return { q: q.text, type: q.type, selected: a, correct: right, ok: hit };
+  });
+  const score = auto ? Math.round(ok / auto * 100) : 0;
+  return { items, score, passed: score >= quiz.pass, hasText: quiz.questions.some(q => q.type === 'text') };
+}
+
+function addAttempt(emp, lid, answers, date, reviewed) {
+  const quiz = LESSONS[lid].lesson.quiz;
+  const g = grade(quiz, answers);
+  const n = attemptsOf(emp, lid).length + 1;
+  const at = { id: 't' + (++uid), emp, lesson: lid, n, score: g.score, status: g.passed ? 'PASSED' : 'FAILED', hasText: g.hasText, items: g.items, date, reviewed };
+  DB.attempts.push(at);
+  return at;
+}
+const attemptsOf = (emp, lid) => DB.attempts.filter(a => a.emp === emp && a.lesson === lid);
+const passedAttempt = (emp, lid) => attemptsOf(emp, lid).find(a => a.status === 'PASSED');
+const activeAssign = (emp, cid) => DB.assign.find(a => a.emp === emp && a.course === cid && a.active);
+const myAssigns = emp => DB.assign.filter(a => a.emp === emp && a.active);
+
+function courseStats(emp, cid) {
+  const c = COURSES[cid], a = DB.assign.find(x => x.emp === emp && x.course === cid);
+  const dates = c.flat.map(l => DB.done.get(key(emp, l.id))).filter(Boolean);
+  const done = dates.length, total = c.flat.length, pct = total ? Math.round(done / total * 100) : 0;
+  const status = done === 0 ? 'not_started' : done === total ? 'completed' : 'in_progress';
+  const finishedAt = status === 'completed' ? new Date(Math.max(...dates)) : null;
+  const overdue = a && status !== 'completed' && a.due < new Date();
+  const soon = a && status !== 'completed' && !overdue && a.due - new Date() < 4 * DAY;
+  return { done, total, pct, status, finishedAt, overdue, soon, a };
+}
+
+// День N+1 открывается, когда пройдены все уроки дня N и наступила полночь после последнего из них
+function dayStates(emp, c) {
+  const res = [];
+  c.days.forEach((d, i) => {
+    if (i === 0) return res.push({ open: true });
+    const prev = c.days[i - 1];
+    if (!res[i - 1].open) return res.push({ open: false, why: 'Откроется после предыдущих дней' });
+    const dates = prev.lessons.map(l => DB.done.get(key(emp, l.id)));
+    if (dates.some(x => !x)) return res.push({ open: false, why: 'Откроется после прохождения «' + prev.title + '»' });
+    const at = nextMidnight(new Date(Math.max(...dates)));
+    if (new Date() >= at) return res.push({ open: true });
+    res.push({ open: false, why: 'Откроется ' + fmtDT(at) + ' — не больше одного дня обучения в сутки' });
+  });
+  return res;
+}
+
+function lessonAccess(emp, lid) {
+  const L = LESSONS[lid];
+  if (!L || !activeAssign(emp, L.course.id)) return false;
+  return dayStates(emp, L.course)[L.dayIdx].open;
+}
+
+function continueLesson(emp) {
+  for (const a of myAssigns(emp).sort((x, y) => x.due - y.due)) {
+    const c = COURSES[a.course], ds = dayStates(emp, c);
+    for (let i = 0; i < c.days.length; i++) {
+      if (!ds[i].open) break;
+      const l = c.days[i].lessons.find(l => !DB.done.has(key(emp, l.id)));
+      if (l) return l.id;
+    }
+  }
+  return null;
+}
+
+function empSummary(emp) {
+  const as = myAssigns(emp), st = as.map(a => courseStats(emp, a.course));
+  const acts = [...DB.done].filter(([k]) => k.startsWith(emp + '|')).map(([, d]) => d)
+    .concat(DB.attempts.filter(a => a.emp === emp).map(a => a.date));
+  return {
+    courses: as.length,
+    avg: st.length ? Math.round(st.reduce((s, x) => s + x.pct, 0) / st.length) : 0,
+    completed: st.filter(x => x.status === 'completed').length,
+    overdue: st.filter(x => x.overdue).length,
+    soon: st.filter(x => x.soon).length,
+    last: acts.length ? new Date(Math.max(...acts)) : null
+  };
+}
+
+/* =====================================================================
+   СОСТОЯНИЕ ИНТЕРФЕЙСА
+   ===================================================================== */
+function resetUI() {
+  S = {
+    view: 'catalog', me: 'e1', course: null, filter: 'all', search: '',
+    lesson: null, step: 0, q: null,
+    adm: { search: '', open: null, course: 'c5', due: isoDate(rel(14)), sel: new Set(), tf: 'active', tc: 'all', openT: null }
+  };
+}
+function isoDate(d) { return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+
+let toastTimer;
+function toast(msg) { S.toast = msg; clearTimeout(toastTimer); toastTimer = setTimeout(() => { S.toast = null; render(); }, 2800); }
+
+function openLesson(lid) {
+  S.lesson = lid; S.step = 0; S.q = null; S.view = 'lesson'; window.scrollTo(0, 0);
+}
+
+/* =====================================================================
+   ОТРИСОВКА
+   ===================================================================== */
+const STATUS = {
+  not_started: ['Не начат', 'b-gray'], in_progress: ['В процессе', 'b-info'], completed: ['Завершён', 'b-ok']
+};
+const bar = (pct) => `<div class="bar ${pct === 100 ? 'done' : ''}"><i style="width:${pct}%"></i></div>`;
+function statusBadge(st) {
+  let h = `<span class="badge ${STATUS[st.status][1]}">${STATUS[st.status][0]}</span>`;
+  if (st.overdue) h += ` <span class="badge b-bad">Просрочен</span>`;
+  else if (st.soon) h += ` <span class="badge b-warn">Скоро срок</span>`;
+  return h;
+}
+
+function render() {
+  const f = document.activeElement, fk = f && f.dataset && f.dataset.i, pos = f && f.selectionStart;
+  const views = { catalog: vCatalog, lesson: vLesson, progress: vProgress, admin: vAdmin };
+  const tabs = [['catalog', 'Курсы'], ['lesson', 'Урок'], ['progress', 'Прогресс'], ['admin', 'Админ']];
+  document.getElementById('app').innerHTML = `
+  <header class="top"><div class="top-in">
+    <div class="logo"><svg width="26" height="26" viewBox="0 0 32 32"><rect width="32" height="32" rx="8" fill="#fff" fill-opacity=".12"/><path d="M8 22h5v-5h5v-5h6" stroke="#f2b35b" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>${esc(DATA.company)}</div>
+    <nav class="tabs">${tabs.map(([k, t]) => `<button class="tab ${S.view === k ? 'on' : ''}" data-a="view" data-v="${k}">${t}</button>`).join('')}</nav>
+    <label class="as"><span>Сотрудник:</span><select data-i="me" aria-label="Сотрудник">${DATA.employees.map(e => `<option value="${e.id}" ${e.id === S.me ? 'selected' : ''}>${esc(e.name)}</option>`).join('')}</select></label>
+  </div></header>
+  <main>${views[S.view]()}</main>
+  ${S.toast ? `<div class="toast">${esc(S.toast)}</div>` : ''}`;
+  if (fk) { const el = document.querySelector(`[data-i="${fk}"]`); if (el) { el.focus(); if (pos != null && el.setSelectionRange) try { el.setSelectionRange(pos, pos); } catch (e) {} } }
+}
+
+/* ---------- 1. Каталог ---------- */
+function vCatalog() {
+  if (S.course) return vCourse();
+  const emp = EMP[S.me], list = myAssigns(S.me).map(a => ({ a, c: COURSES[a.course], st: courseStats(S.me, a.course) }));
+  const all = list.flatMap(x => x.c.flat), doneAll = all.filter(l => DB.done.has(key(S.me, l.id))).length;
+  const pctAll = all.length ? Math.round(doneAll / all.length * 100) : 0;
+  const filters = [['all', 'Все', () => true], ['not_started', 'Не начаты', x => x.st.status === 'not_started'], ['in_progress', 'В процессе', x => x.st.status === 'in_progress'], ['completed', 'Завершены', x => x.st.status === 'completed'], ['overdue', 'Просрочены', x => x.st.overdue]];
+  const q = S.search.trim().toLowerCase();
+  const shown = list.filter(filters.find(f => f[0] === S.filter)[2]).filter(x => !q || (x.c.title + ' ' + x.c.description + ' ' + x.c.tag).toLowerCase().includes(q));
+  const cont = continueLesson(S.me);
+  return `<div class="stack">
+    <div class="row between"><div><h1>Мои курсы</h1><div class="muted">${esc(emp.name)} · ${esc(emp.position)}</div></div>
+      ${cont ? `<button class="btn pri" data-a="lesson" data-l="${cont}">Продолжить: ${esc(LESSONS[cont].lesson.title)}</button>` : ''}</div>
+    <div class="card"><div class="row between"><b>Общий прогресс</b><span class="muted small">${doneAll} из ${all.length} уроков · ${pctAll}%</span></div><div style="margin-top:10px">${bar(pctAll)}</div></div>
+    <div class="row between">
+      <div class="row" style="gap:6px">${filters.map(([k, t, fn]) => `<button class="chip ${S.filter === k ? 'on' : ''}" data-a="filter" data-v="${k}">${t}<b>${list.filter(fn).length}</b></button>`).join('')}</div>
+      <input class="inp" data-i="search" placeholder="Поиск по курсам" value="${esc(S.search)}" style="flex:1;max-width:280px;min-width:160px">
+    </div>
+    ${shown.length ? `<div class="grid g2">${shown.map(({ c, st }) => `
+      <div class="card ccard" data-a="course" data-c="${c.id}" role="button" tabindex="0">
+        <div class="row between"><span class="ctag">${esc(c.tag)}</span><span>${statusBadge(st)}</span></div>
+        <h2>${esc(c.title)}</h2><div class="muted small">${esc(c.description)}</div>
+        ${bar(st.pct)}
+        <div class="row between small muted"><span>${st.done} из ${st.total} уроков · ${st.pct}%</span><span>${st.status === 'completed' ? 'Завершён ' + fmtD(st.finishedAt) : 'Срок: ' + fmtD(st.a.due)}</span></div>
+      </div>`).join('')}</div>`
+      : `<div class="card empty">${list.length ? 'Ничего не найдено — измените фильтр или запрос' : 'Сотруднику пока не назначено ни одного курса'}</div>`}
+  </div>`;
+}
+
+function vCourse() {
+  const c = COURSES[S.course], st = courseStats(S.me, c.id), ds = dayStates(S.me, c);
+  return `<div class="stack">
+    <button class="btn link" data-a="back">← Все курсы</button>
+    <div class="card"><div class="row between"><div><span class="ctag">${esc(c.tag)}</span><h1>${esc(c.title)}</h1></div><span>${statusBadge(st)}</span></div>
+      <p class="muted">${esc(c.description)}</p>${bar(st.pct)}
+      <div class="row between small muted" style="margin-top:8px"><span>${st.done} из ${st.total} уроков · ${st.pct}%</span><span>Назначен ${fmtD(st.a.assigned)} · срок ${fmtD(st.a.due)}</span></div></div>
+    ${c.days.map((d, i) => {
+      const done = d.lessons.filter(l => DB.done.has(key(S.me, l.id))).length;
+      return `<div class="day ${ds[i].open ? '' : 'lock'}">
+        <div class="day-h"><b>${ds[i].open ? '' : '🔒 '}${esc(d.title)}</b><span class="small muted">${ds[i].open ? done + ' из ' + d.lessons.length : esc(ds[i].why)}</span></div>
+        ${d.lessons.map(l => {
+          const dn = DB.done.get(key(S.me, l.id));
+          const inner = `<span class="dot ${dn ? 'ok' : ''}">${dn ? '✓' : ''}</span><span style="flex:1">${esc(l.title)}</span>${l.quiz ? '<span class="badge b-gray">тест</span>' : ''}${dn ? `<span class="small muted hide-m">${fmtD(dn)}</span>` : ''}`;
+          return ds[i].open ? `<button class="les" data-a="lesson" data-l="${l.id}">${inner}</button>` : `<div class="les">${inner}</div>`;
+        }).join('')}</div>`;
+    }).join('')}
+  </div>`;
+}
+
+/* ---------- 2. Урок ---------- */
+function vLesson() {
+  if (!S.lesson || !lessonAccess(S.me, S.lesson)) { S.lesson = continueLesson(S.me); S.step = 0; S.q = null; }
+  if (!S.lesson) return `<div class="card empty"><h2>Нет доступных уроков</h2><p>Все открытые уроки пройдены, либо следующий день ещё не открылся.</p><button class="btn pri" data-a="view" data-v="catalog">К курсам</button></div>`;
+  const L = LESSONS[S.lesson], l = L.lesson, c = L.course, ds = dayStates(S.me, c);
+  const steps = l.steps.map(s => s[0]).concat(l.quiz ? ['Тест'] : []);
+  const last = S.step === steps.length - 1;
+  const isQuiz = l.quiz && last;
+  const doneAt = DB.done.get(key(S.me, l.id));
+  const body = isQuiz ? vQuiz(l) : `<h2>${esc(l.steps[S.step][0])}</h2><div class="content" style="margin-top:10px">${md(l.steps[S.step][1])}</div>`;
+  return `<div class="lesson-grid">
+    <aside class="card side">
+      <div class="small muted">${esc(c.title)}</div>
+      ${c.days.map((d, i) => `<div style="margin-top:12px"><div class="small"><b>${esc(d.title)}</b>${ds[i].open ? '' : ' 🔒'}</div>
+        ${d.lessons.map(x => {
+          const dn = DB.done.has(key(S.me, x.id));
+          const inner = `<span class="dot ${dn ? 'ok' : ''}">${dn ? '✓' : ''}</span><span>${esc(x.title)}</span>`;
+          return ds[i].open ? `<button class="les ${x.id === l.id ? 'cur' : ''}" data-a="lesson" data-l="${x.id}">${inner}</button>` : `<div class="les" style="opacity:.6">${inner}</div>`;
+        }).join('')}</div>`).join('')}
+    </aside>
+    <section class="card">
+      <div class="small muted">${esc(L.day.title)}</div>
+      <h1>${esc(l.title)}</h1>
+      <div class="steps">${steps.map((s, i) => `<button class="chip ${i === S.step ? 'on' : ''}" data-a="step" data-v="${i}">${i + 1}. ${esc(s)}</button>`).join('')}</div>
+      ${body}
+      <div class="foot row between">
+        <div>${S.step > 0 ? `<button class="btn" data-a="step" data-v="${S.step - 1}">← Назад</button>` : ''}</div>
+        <div>${!last ? `<button class="btn pri" data-a="step" data-v="${S.step + 1}">Далее →</button>` : vComplete(l, doneAt)}</div>
+      </div>
+    </section>
+  </div>`;
+}
+
+function md(text) {
+  let out = '', ul = false;
+  text.split('\n').forEach(line => {
+    if (line.startsWith('- ')) { if (!ul) { out += '<ul>'; ul = true; } out += `<li>${esc(line.slice(2))}</li>`; return; }
+    if (ul) { out += '</ul>'; ul = false; }
+    out += line.startsWith('! ') ? `<div class="note">${esc(line.slice(2))}</div>` : `<p>${esc(line)}</p>`;
+  });
+  return out + (ul ? '</ul>' : '');
+}
+
+function vComplete(l, doneAt) {
+  if (doneAt) {
+    const nx = nextTarget(l);
+    return `<div class="row"><span class="badge b-ok">Урок пройден ${fmtD(doneAt)}</span>${nx.id ? `<button class="btn pri" data-a="lesson" data-l="${nx.id}">Следующий урок →</button>` : `<span class="small muted">${esc(nx.msg)}</span>`}</div>`;
+  }
+  if (l.quiz && !passedAttempt(S.me, l.id)) return `<span class="small muted">Завершить урок можно после сдачи теста</span>`;
+  return `<button class="btn pri" data-a="complete">Завершить урок</button>`;
+}
+
+function nextTarget(l) {
+  const L = LESSONS[l.id], c = L.course;
+  const nx = c.flat.find(x => !DB.done.has(key(S.me, x.id)));
+  if (!nx) return { msg: 'Курс завершён полностью 🎉' };
+  if (lessonAccess(S.me, nx.id)) return { id: nx.id };
+  return { msg: dayStates(S.me, c)[LESSONS[nx.id].dayIdx].why };
+}
+
+function vQuiz(l) {
+  const quiz = l.quiz, tries = attemptsOf(S.me, l.id), passed = passedAttempt(S.me, l.id), max = DATA.maxAttempts;
+  if (!S.q || S.q.lesson !== l.id) S.q = { lesson: l.id, ans: {}, res: null, err: '' };
+  const q = S.q;
+  const head = `<div class="row between"><h2>Проверка знаний</h2><span class="small muted">Проходной балл ${quiz.pass}% · попыток ${tries.length} из ${max}</span></div>`;
+  if (passed && !q.res) return `${head}<div class="result ok"><b>Тест сдан: ${passed.score}%</b><div class="small">Попытка ${passed.n}, ${fmtD(passed.date)}. Повторная сдача не требуется.</div></div>`;
+  if (!q.res && tries.length >= max) return `${head}<div class="result bad"><b>Лимит попыток исчерпан</b><div class="small">Обратитесь к руководителю, чтобы попытки сбросили.</div></div>`;
+  const locked = !!q.res;
+  const qs = quiz.questions.map((qq, i) => {
+    const it = q.res && q.res.items[i];
+    const cls = it ? (it.ok === null ? 'rev' : it.ok ? 'ok' : 'bad') : '';
+    const mark = it ? (it.ok === null ? '<span class="badge b-warn">на проверке у руководителя</span>' : it.ok ? '<span class="badge b-ok">верно</span>' : '<span class="badge b-bad">неверно</span>') : '';
+    let inp;
+    if (qq.type === 'text') inp = `<textarea class="inp" data-i="t${i}" placeholder="Ваш ответ" ${locked ? 'disabled' : ''}>${esc(q.ans[i] || '')}</textarea>`;
+    else inp = qq.options.map(o => {
+      const t = optText(o), sel = (q.ans[i] || []).includes(t);
+      return `<label class="opt"><input type="${qq.type}" name="q${i}" data-a="opt" data-q="${i}" data-o="${esc(t)}" ${sel ? 'checked' : ''} ${locked ? 'disabled' : ''}><span>${esc(t)}</span></label>`;
+    }).join('');
+    return `<div class="q ${cls}"><div class="row between" style="margin-bottom:6px"><b>${i + 1}. ${esc(qq.text)}</b>${mark}</div>
+      <div class="small muted" style="margin-bottom:4px">${qq.type === 'checkbox' ? 'Несколько вариантов' : qq.type === 'radio' ? 'Один вариант' : 'Свободный ответ'}</div>${inp}</div>`;
+  }).join('');
+  let res = '';
+  if (q.res) {
+    const a = q.res.attempt, left = max - a.n;
+    res = `<div class="result ${a.status === 'PASSED' ? 'ok' : 'bad'}"><b>${a.status === 'PASSED' ? 'Тест сдан' : 'Тест не сдан'}: ${a.score}%</b>
+      <div class="small">Верно ${q.res.items.filter(x => x.ok).length} из ${q.res.items.filter(x => x.ok !== null).length} автопроверяемых вопросов · попытка ${a.n} из ${max}${a.status === 'PASSED' ? '' : ' · осталось ' + left}${a.hasText ? ' · письменный ответ отправлен руководителю' : ''}</div></div>
+      ${a.status !== 'PASSED' && left > 0 ? '<button class="btn" data-a="retry">Пройти ещё раз</button>' : ''}`;
+  }
+  return `${head}<div style="margin-top:14px">${qs}</div>${q.err ? `<div class="result bad small">${esc(q.err)}</div>` : ''}${res}
+    ${!locked ? '<button class="btn pri" data-a="check">Проверить ответы</button>' : ''}`;
+}
+
+/* ---------- 3. Прогресс ---------- */
+function vProgress() {
+  const emp = EMP[S.me], sm = empSummary(S.me);
+  const list = myAssigns(S.me).map(a => ({ c: COURSES[a.course], st: courseStats(S.me, a.course) }))
+    .sort((x, y) => (x.st.status === 'completed') - (y.st.status === 'completed') || x.st.a.due - y.st.a.due);
+  const all = list.flatMap(x => x.c.flat), doneAll = all.filter(l => DB.done.has(key(S.me, l.id))).length;
+  const tries = DB.attempts.filter(a => a.emp === S.me).sort((a, b) => b.date - a.date);
+  return `<div class="stack">
+    <div><h1>${esc(emp.name)}</h1><div class="muted">${esc(emp.position)}${sm.last ? ' · последняя активность ' + fmtD(sm.last) : ''}</div></div>
+    <div class="grid g4">
+      <div class="card kpi"><div class="l">Общий прогресс</div><div class="v">${all.length ? Math.round(doneAll / all.length * 100) : 0}%</div><div class="small muted">${doneAll} из ${all.length} уроков</div></div>
+      <div class="card kpi"><div class="l">Завершено курсов</div><div class="v">${sm.completed} / ${sm.courses}</div></div>
+      <div class="card kpi"><div class="l">В работе</div><div class="v">${sm.courses - sm.completed}</div></div>
+      <div class="card kpi"><div class="l">Просрочено</div><div class="v" style="color:${sm.overdue ? 'var(--bad)' : 'inherit'}">${sm.overdue}</div></div>
+    </div>
+    <div class="card"><h2>Курсы</h2>
+      ${list.length ? `<div class="scroll" style="margin-top:8px"><table><thead><tr><th>Курс</th><th style="min-width:160px">Прогресс</th><th>Назначен</th><th>Срок</th><th>Статус</th></tr></thead><tbody>
+      ${list.map(({ c, st }) => `<tr class="click" data-a="course" data-c="${c.id}"><td><b>${esc(c.title)}</b></td><td>${bar(st.pct)}<div class="small muted">${st.done}/${st.total} · ${st.pct}%</div></td>
+        <td>${fmtD(st.a.assigned)}</td><td>${st.status === 'completed' ? '<span class="muted">завершён ' + fmtD(st.finishedAt) + '</span>' : fmtD(st.a.due)}</td><td>${statusBadge(st)}</td></tr>`).join('')}
+      </tbody></table></div>` : '<div class="empty">Курсы не назначены</div>'}</div>
+    <div class="card"><h2>Попытки тестов</h2>
+      ${tries.length ? `<div class="scroll" style="margin-top:8px"><table><thead><tr><th>Дата</th><th>Курс · урок</th><th>Попытка</th><th>Результат</th><th>Статус</th></tr></thead><tbody>
+      ${tries.map(t => `<tr><td>${fmtD(t.date)}</td><td>${esc(LESSONS[t.lesson].course.title)} · ${esc(LESSONS[t.lesson].lesson.title)}</td><td>${t.n}</td><td>${t.score}%</td><td>${attemptBadge(t)}</td></tr>`).join('')}
+      </tbody></table></div>` : '<div class="empty">Тесты ещё не проходились</div>'}</div>
+  </div>`;
+}
+const attemptBadge = t => (t.status === 'PASSED' ? '<span class="badge b-ok">Сдан</span>' : '<span class="badge b-bad">Не сдан</span>') + (t.reviewed ? ' <span class="badge b-gray">Проверено</span>' : t.hasText ? ' <span class="badge b-warn">Ждёт проверки</span>' : '');
+
+/* ---------- 4. Админ ---------- */
+function vAdmin() {
+  const A = S.adm;
+  const rows = DATA.employees.map(e => ({ e, s: empSummary(e.id) }))
+    .filter(r => !A.search || (r.e.name + ' ' + r.e.position).toLowerCase().includes(A.search.toLowerCase()))
+    .sort((a, b) => b.s.overdue - a.s.overdue || a.s.avg - b.s.avg);
+  const allS = DATA.employees.map(e => empSummary(e.id));
+  const lagging = allS.filter(s => s.overdue || s.soon).length;
+  const pending = DB.attempts.filter(t => !t.reviewed).length;
+  const activeCnt = DB.assign.filter(a => a.active).length;
+  return `<div class="stack">
+    <h1>Панель администратора</h1>
+    <div class="grid g4">
+      <div class="card kpi"><div class="l">Сотрудников</div><div class="v">${DATA.employees.length}</div></div>
+      <div class="card kpi"><div class="l">Активных назначений</div><div class="v">${activeCnt}</div></div>
+      <div class="card kpi"><div class="l">Отстают от срока</div><div class="v" style="color:${lagging ? 'var(--bad)' : 'inherit'}">${lagging}</div></div>
+      <div class="card kpi"><div class="l">Тестов на проверке</div><div class="v">${pending}</div></div>
+    </div>
+    <div class="card"><div class="row between"><h2>Сотрудники</h2><input class="inp" data-i="asearch" placeholder="Поиск сотрудника" value="${esc(A.search)}" style="flex:1;max-width:260px;min-width:150px"></div>
+      <div class="scroll" style="margin-top:8px"><table><thead><tr><th>Сотрудник</th><th>Курсов</th><th style="min-width:140px">Средний %</th><th>Сроки</th><th>Активность</th></tr></thead><tbody>
+      ${rows.map(({ e, s }) => `<tr class="click ${A.open === e.id ? 'open' : ''}" data-a="aemp" data-e="${e.id}">
+          <td><b>${esc(e.name)}</b><div class="small muted">${esc(e.position)}</div></td><td>${s.completed}/${s.courses}</td><td>${bar(s.avg)}<div class="small muted">${s.avg}%</div></td>
+          <td>${s.overdue ? `<span class="badge b-bad">просрочено ${s.overdue}</span>` : s.soon ? '<span class="badge b-warn">скоро срок</span>' : s.courses ? '<span class="badge b-ok">в срок</span>' : '<span class="muted">—</span>'}</td>
+          <td class="small">${s.last ? fmtD(s.last) : '—'}</td></tr>
+          ${A.open === e.id ? `<tr class="sub"><td colspan="5">${vEmpDetail(e)}</td></tr>` : ''}`).join('')}
+      </tbody></table>${rows.length ? '' : '<div class="empty">Никого не найдено</div>'}</div></div>
+    ${vAssign()}
+    ${vTests()}
+  </div>`;
+}
+
+function vEmpDetail(e) {
+  const as = DB.assign.filter(a => a.emp === e.id).sort((a, b) => b.active - a.active);
+  return `${as.length ? `<table><tbody>${as.map(a => {
+      const st = courseStats(e.id, a.course);
+      return `<tr><td>${esc(COURSES[a.course].title)}</td><td style="min-width:110px">${st.pct}%</td>
+        <td class="small">${a.active ? 'срок ' + fmtD(a.due) : 'отозван'}</td><td>${a.active ? statusBadge(st) : '<span class="badge b-gray">Отозван</span>'}</td>
+        <td style="text-align:right">${a.active ? `<button class="btn sm" data-a="revoke" data-id="${a.id}">Отозвать</button>` : `<button class="btn sm" data-a="restore" data-id="${a.id}">Вернуть</button>`}</td></tr>`;
+    }).join('')}</tbody></table>` : '<div class="muted small">Курсы не назначены</div>'}
+    <div style="margin-top:10px"><button class="btn sm" data-a="viewas" data-e="${e.id}">Открыть прогресс сотрудника →</button></div>`;
+}
+
+function vAssign() {
+  const A = S.adm;
+  const emps = DATA.employees.map(e => {
+    const a = DB.assign.find(x => x.emp === e.id && x.course === A.course);
+    return { e, state: !a ? 'new' : a.active ? 'active' : 'revoked' };
+  });
+  const n = [...A.sel].filter(id => emps.find(x => x.e.id === id && x.state !== 'active')).length;
+  return `<div class="card"><h2>Назначить курс</h2>
+    <div class="row" style="margin-top:10px">
+      <select class="inp" data-i="acourse" style="flex:1;min-width:180px">${DATA.courses.map(c => `<option value="${c.id}" ${c.id === A.course ? 'selected' : ''}>${esc(c.title)}</option>`).join('')}</select>
+      <label class="row small" style="gap:6px">Срок <input class="inp" type="date" data-i="adue" value="${A.due}"></label>
+    </div>
+    <div class="grid g2" style="margin-top:12px;gap:4px 14px">${emps.map(({ e, state }) => `<label class="opt" style="${state === 'active' ? 'opacity:.55;cursor:default' : ''}">
+      <input type="checkbox" data-a="asel" data-e="${e.id}" ${state === 'active' ? 'checked disabled' : A.sel.has(e.id) ? 'checked' : ''}>
+      <span>${esc(e.name)} <span class="small muted">${state === 'active' ? '· уже назначен' : state === 'revoked' ? '· был отозван, вернётся с прогрессом' : ''}</span></span></label>`).join('')}</div>
+    <div class="row" style="margin-top:12px">${n ? `<button class="btn pri" data-a="assign">Назначить (${n})</button>` : '<span class="small muted">Выберите сотрудников, чтобы назначить курс</span>'}</div>
+  </div>`;
+}
+
+function vTests() {
+  const A = S.adm;
+  const fl = [['active', 'Непроверенные', t => !t.reviewed], ['failed', 'Не сданы', t => t.status === 'FAILED'], ['all', 'Все', () => true]];
+  const list = DB.attempts.filter(fl.find(f => f[0] === A.tf)[2]).filter(t => A.tc === 'all' || LESSONS[t.lesson].course.id === A.tc).sort((a, b) => b.date - a.date);
+  return `<div class="card"><div class="row between"><h2>Результаты тестов</h2>
+      <select class="inp" data-i="tcourse" style="min-width:160px"><option value="all">Все курсы</option>${DATA.courses.map(c => `<option value="${c.id}" ${A.tc === c.id ? 'selected' : ''}>${esc(c.title)}</option>`).join('')}</select></div>
+    <div class="row" style="gap:6px;margin-top:10px">${fl.map(([k, t, fn]) => `<button class="chip ${A.tf === k ? 'on' : ''}" data-a="tf" data-v="${k}">${t}<b>${DB.attempts.filter(fn).length}</b></button>`).join('')}</div>
+    ${list.length ? `<div class="scroll" style="margin-top:8px"><table><thead><tr><th>Дата</th><th>Сотрудник</th><th>Урок</th><th>№</th><th>Балл</th><th>Статус</th></tr></thead><tbody>
+    ${list.map(t => `<tr class="click ${A.openT === t.id ? 'open' : ''}" data-a="topen" data-id="${t.id}"><td class="small">${fmtD(t.date)}</td><td>${esc(EMP[t.emp].name)}</td>
+      <td>${esc(LESSONS[t.lesson].lesson.title)}<div class="small muted">${esc(LESSONS[t.lesson].course.title)}</div></td><td>${t.n}</td><td><b>${t.score}%</b></td><td>${attemptBadge(t)}</td></tr>
+      ${A.openT === t.id ? `<tr class="sub"><td colspan="6">${t.items.map((it, i) => `<div class="ans"><b>${i + 1}. ${esc(it.q)}</b>
+          ${it.ok === null ? `<div>Ответ: «${esc(it.text)}»</div>` : `<div>Выбрано: ${esc(it.selected.join(', ') || '—')} ${it.ok ? '<span class="badge b-ok">верно</span>' : `<span class="badge b-bad">неверно</span><div class="small muted">Правильно: ${esc(it.correct.join(', '))}</div>`}</div>`}</div>`).join('')}
+        <div style="margin-top:10px">${t.reviewed ? '<span class="badge b-gray">Проверено</span>' : `<button class="btn sm pri" data-a="review" data-id="${t.id}">Отметить как проверенный</button>`}</div></td></tr>` : ''}`).join('')}
+    </tbody></table></div>` : '<div class="empty">Нет попыток по выбранным условиям</div>'}
+  </div>`;
+}
+
+/* =====================================================================
+   СОБЫТИЯ
+   ===================================================================== */
+const actions = {
+  view: d => { S.view = d.v; if (d.v === 'catalog') S.course = null; window.scrollTo(0, 0); },
+  filter: d => S.filter = d.v,
+  course: d => { S.view = 'catalog'; S.course = d.c; window.scrollTo(0, 0); },
+  back: () => S.course = null,
+  lesson: d => openLesson(d.l),
+  step: d => { S.step = +d.v; },
+  opt: (d, el) => {
+    const q = LESSONS[S.lesson].lesson.quiz.questions[d.q];
+    const cur = S.q.ans[d.q] || [];
+    S.q.ans[d.q] = q.type === 'radio' ? [d.o] : el.checked ? [...cur, d.o] : cur.filter(x => x !== d.o);
+    S.q.err = '';
+  },
+  check: () => {
+    const quiz = LESSONS[S.lesson].lesson.quiz;
+    const missing = quiz.questions.some((q, i) => q.type === 'text' ? !(S.q.ans[i] || '').trim() : !(S.q.ans[i] || []).length);
+    if (missing) { S.q.err = 'Ответьте на все вопросы, включая письменные.'; return; }
+    const answers = quiz.questions.map((q, i) => q.type === 'text' ? S.q.ans[i].trim() : S.q.ans[i]);
+    const at = addAttempt(S.me, S.lesson, answers, new Date(), false);
+    S.q.res = { attempt: at, items: at.items };
+    toast(at.status === 'PASSED' ? 'Тест сдан — теперь урок можно завершить' : 'Тест не сдан, попытка сохранена');
+  },
+  retry: () => { S.q = null; },
+  complete: () => {
+    DB.done.set(key(S.me, S.lesson), new Date());
+    const st = courseStats(S.me, LESSONS[S.lesson].course.id);
+    toast(st.status === 'completed' ? 'Курс завершён!' : `Урок пройден. Прогресс по курсу: ${st.pct}%`);
+  },
+  aemp: d => S.adm.open = S.adm.open === d.e ? null : d.e,
+  revoke: d => { const a = DB.assign.find(x => x.id === d.id); a.active = false; toast(`Курс «${COURSES[a.course].title}» отозван у ${EMP[a.emp].name}`); },
+  restore: d => { const a = DB.assign.find(x => x.id === d.id); a.active = true; if (a.due < new Date()) a.due = rel(14); toast('Назначение восстановлено, прогресс сохранён'); },
+  viewas: d => { S.me = d.e; S.view = 'progress'; S.course = null; S.lesson = null; window.scrollTo(0, 0); },
+  asel: (d, el) => { el.checked ? S.adm.sel.add(d.e) : S.adm.sel.delete(d.e); },
+  assign: () => {
+    const A = S.adm, due = A.due ? new Date(A.due + 'T23:59:00') : rel(14);
+    let created = 0, restored = 0;
+    A.sel.forEach(emp => {
+      const a = DB.assign.find(x => x.emp === emp && x.course === A.course);
+      if (!a) { DB.assign.push({ id: 'a' + (++uid), emp, course: A.course, assigned: new Date(), due, active: true }); created++; }
+      else if (!a.active) { a.active = true; a.due = due; a.assigned = new Date(); restored++; }
+    });
+    A.sel.clear();
+    toast(`Назначено: ${created}${restored ? ', восстановлено: ' + restored : ''}. Курс уже виден у сотрудников`);
+  },
+  tf: d => { S.adm.tf = d.v; S.adm.openT = null; },
+  topen: d => S.adm.openT = S.adm.openT === d.id ? null : d.id,
+  review: d => { DB.attempts.find(t => t.id === d.id).reviewed = true; toast('Попытка отмечена как проверенная'); }
+};
+
+document.addEventListener('click', e => {
+  const el = e.target.closest('[data-a]');
+  if (!el || el.disabled) return;
+  if (el.tagName === 'INPUT' && el.type !== 'checkbox' && el.type !== 'radio') return;
+  if (e.target.closest('.sub') && el.closest('tr.click') === el) return;
+  actions[el.dataset.a](el.dataset, el);
+  render();
+});
+document.addEventListener('keydown', e => {
+  if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('.ccard')) { e.preventDefault(); e.target.click(); }
+});
+const inputs = {
+  me: v => { S.me = v; S.course = null; S.lesson = null; S.q = null; },
+  search: v => S.search = v,
+  asearch: v => S.adm.search = v,
+  acourse: v => { S.adm.course = v; S.adm.sel.clear(); },
+  adue: v => S.adm.due = v,
+  tcourse: v => { S.adm.tc = v; S.adm.openT = null; }
+};
+function onInput(e) {
+  const k = e.target.dataset && e.target.dataset.i;
+  if (!k) return;
+  if (k[0] === 't' && /^t\d+$/.test(k)) { S.q.ans[k.slice(1)] = e.target.value; S.q.err = ''; return; } // без перерисовки, чтобы не сбивать ввод
+  inputs[k](e.target.value);
+  render();
+}
+document.addEventListener('input', e => { if (e.target.tagName !== 'SELECT' && e.target.type !== 'date') onInput(e); });
+document.addEventListener('change', e => { if (e.target.tagName === 'SELECT' || e.target.type === 'date') onInput(e); });
+
+seed(); resetUI(); render();
+</script>
+</body>
+</html>
